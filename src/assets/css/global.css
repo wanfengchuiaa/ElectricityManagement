@@ -10,3 +10,10 @@ html,body,#app {
 .el-pagination {
   margin-top: 20px;
 }
+.el-breadcrumb {
+  margin-bottom: 20px;
+}
+.el-card  {
+  margin-top: 20px;
+
+}

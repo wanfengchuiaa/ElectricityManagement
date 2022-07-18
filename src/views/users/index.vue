@@ -6,8 +6,9 @@
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
       <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
-    <!-- 卡片内容 -->
+
     <el-card class="box-card">
+      <!-- 卡片内容 -->
       <el-row :gutter="15">
         <el-col :span="9">
           <div>
@@ -42,7 +43,7 @@
         <el-table-column type="index" label="#"> </el-table-column>
         <el-table-column prop="username" label="姓名" width="180">
         </el-table-column>
-        <el-table-column prop="create_time" label="电话"> </el-table-column>
+        <el-table-column prop="mobile" label="电话"> </el-table-column>
         <el-table-column prop="role_name" label="角色"> </el-table-column>
         <el-table-column prop="mg_state" label="状态">
           <template slot-scope="scope">
@@ -303,8 +304,4 @@ export default {
 }
 </script>
 
-<style scoped lang="less">
-.el-breadcrumb {
-  margin-bottom: 20px;
-}
-</style>
+<style scoped lang="less"></style>

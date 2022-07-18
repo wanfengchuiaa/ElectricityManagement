@@ -25,6 +25,16 @@ const routes = [
         component: () => import('@/components/huanying')
       },
       {
+        path: '/rights',
+        name: 'rights',
+        component: () => import('@/views/power/rights')
+      },
+      {
+        path: '/roles',
+        name: 'roles',
+        component: () => import('@/views/power/roles')
+      },
+      {
         path: '/users',
         name: 'users',
         component: () => import('@/views/users')
