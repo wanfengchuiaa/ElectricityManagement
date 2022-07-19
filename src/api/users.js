@@ -71,8 +71,17 @@ export const DistributionUser = (id, rid) => {
   return request({
     method: 'put',
     url: `users/${id}/role`,
-    body: {
+    data: {
       rid
     }
+  })
+}
+
+/**
+ * 获取角色列表
+ */
+export const getRoleList = () => {
+  return request({
+    url: 'roles'
   })
 }

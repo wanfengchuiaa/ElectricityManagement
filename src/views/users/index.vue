@@ -28,9 +28,12 @@
           </div>
         </el-col>
         <el-col :span="4"
-          ><el-button type="primary" @click="dialogFormVisible = true"
-            >添加用户</el-button
-          ></el-col
+        >
+          <el-button type="primary" @click="dialogFormVisible = true"
+          >添加用户
+          </el-button
+          >
+        </el-col
         >
       </el-row>
       <!-- 表格 -->
@@ -40,11 +43,11 @@
         style="width: 100%"
         :border="true"
       >
-        <el-table-column type="index" label="#"> </el-table-column>
+        <el-table-column type="index" label="#"></el-table-column>
         <el-table-column prop="username" label="姓名" width="180">
         </el-table-column>
-        <el-table-column prop="mobile" label="电话"> </el-table-column>
-        <el-table-column prop="role_name" label="角色"> </el-table-column>
+        <el-table-column prop="mobile" label="电话"></el-table-column>
+        <el-table-column prop="role_name" label="角色"></el-table-column>
         <el-table-column prop="mg_state" label="状态">
           <template slot-scope="scope">
             <el-switch
@@ -74,7 +77,7 @@
               type="warning"
               size="mini"
               icon="el-icon-setting"
-              @click="DistributionUser(scope.row.id)"
+              @click="DistributionUser(scope.row)"
             ></el-button>
           </template>
         </el-table-column>
@@ -140,6 +143,31 @@
         </div>
       </el-dialog>
     </el-card>
+
+    <!--    分配角色列表-->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="showAssignRoles"
+      width="40%">
+      <div>
+        <p>当前的用户：{{ userinfo.username }}</p>
+        <p>当前的角色：{{ userinfo.role_name }}</p>
+        <p>分配新角色：
+          <el-select v-model="valuea" placeholder="请选择">
+            <el-option
+              v-for="item in rolesList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="showAssignRoles = false">取 消</el-button>
+    <el-button type="primary" @click="DetermineAssignRoles">确 定</el-button>
+  </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -151,12 +179,14 @@ import {
   IdGetUser,
   emitUser,
   delUser,
-  DistributionUser
+  getRoleList, DistributionUser
 } from '@/api'
+
 export default {
   data() {
     return {
       tableData: [],
+      showAssignRoles: false,
       query: {
         query: '',
         pagenum: 1,
@@ -175,25 +205,71 @@ export default {
       // 添加用户表单验证规则
       AddUserFormRules: {
         username: [
-          { required: true, message: '请输入用户名', trigger: 'blur' },
-          { min: 3, max: 10, message: '长度在 3 到 15 个字符', trigger: 'blur' }
+          {
+            required: true,
+            message: '请输入用户名',
+            trigger: 'blur'
+          },
+          {
+            min: 3,
+            max: 10,
+            message: '长度在 3 到 15 个字符',
+            trigger: 'blur'
+          }
         ],
         password: [
-          { required: true, message: '请输入密码', trigger: 'blur' },
-          { min: 3, max: 10, message: '长度在 6 到 16 个字符', trigger: 'blur' }
+          {
+            required: true,
+            message: '请输入密码',
+            trigger: 'blur'
+          },
+          {
+            min: 3,
+            max: 10,
+            message: '长度在 6 到 16 个字符',
+            trigger: 'blur'
+          }
         ],
-        email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }],
-        mobile: [{ required: true, message: '请输入邮箱', trigger: 'blur' }]
+        email: [{
+          required: true,
+          message: '请输入邮箱',
+          trigger: 'blur'
+        }],
+        mobile: [{
+          required: true,
+          message: '请输入邮箱',
+          trigger: 'blur'
+        }]
       },
       // 修改信息表单验证
       emitUserFormRules: {
         username: [
-          { required: true, message: '请输入用户名', trigger: 'blur' },
-          { min: 3, max: 10, message: '长度在 3 到 15 个字符', trigger: 'blur' }
+          {
+            required: true,
+            message: '请输入用户名',
+            trigger: 'blur'
+          },
+          {
+            min: 3,
+            max: 10,
+            message: '长度在 3 到 15 个字符',
+            trigger: 'blur'
+          }
         ],
-        email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }],
-        mobile: [{ required: true, message: '请输入手机号', trigger: 'blur' }]
-      }
+        email: [{
+          required: true,
+          message: '请输入邮箱',
+          trigger: 'blur'
+        }],
+        mobile: [{
+          required: true,
+          message: '请输入手机号',
+          trigger: 'blur'
+        }]
+      },
+      userinfo: {},
+      rolesList: [],
+      valuea: ''
     }
   },
   created() {
@@ -287,9 +363,18 @@ export default {
           })
         })
     },
-    // 分配用户角色 未完成
-    async DistributionUser() {
-      await DistributionUser()
+    // 分配用户角色
+    async DistributionUser(i) {
+      this.userinfo = i
+      const res = await getRoleList()
+      this.rolesList = res.data.data
+      console.log(res)
+      this.showAssignRoles = true
+    },
+    async DetermineAssignRoles() {
+      await DistributionUser(this.userinfo.id, this.valuea)
+      // this.valuea = ''
+      this.showAssignRoles = false
     },
     // 取消添加用户
     CancelUser() {

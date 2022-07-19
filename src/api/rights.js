@@ -36,3 +36,16 @@ export const getPermissionsListtree = () => {
     url: 'rights/tree'
   })
 }
+
+/**
+ * 角色授权
+ */
+export const getRoleAuthorization = (id, rids) => {
+  return request({
+    method: 'post',
+    url: `roles/${id}/rights`,
+    data: {
+      rids: rids
+    }
+  })
+}

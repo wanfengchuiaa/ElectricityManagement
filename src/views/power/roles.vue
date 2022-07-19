@@ -22,8 +22,9 @@
             >
               <el-col :span="5">
                 <el-tag closable @close="delTag(scope.row, item.id)">{{
-                  item.authName
-                }}</el-tag>
+                    item.authName
+                  }}
+                </el-tag>
                 <i class="el-icon-caret-right"></i>
               </el-col>
               <!-- 二级 -->
@@ -39,7 +40,8 @@
                       type="success"
                       closable
                       @close="delTag(scope.row, i.id)"
-                      >{{ i.authName }}</el-tag
+                    >{{ i.authName }}
+                    </el-tag
                     >
                     <i class="el-icon-caret-right"></i>
                   </el-col>
@@ -51,7 +53,8 @@
                       type="warning"
                       v-for="ii in i.children"
                       :key="ii.id"
-                      >{{ ii.authName }}</el-tag
+                    >{{ ii.authName }}
+                    </el-tag
                     >
                   </el-col>
                 </el-row>
@@ -59,9 +62,9 @@
             </el-row>
           </template>
         </el-table-column>
-        <el-table-column label="#" type="index"> </el-table-column>
-        <el-table-column prop="roleName" label="角色名称"> </el-table-column>
-        <el-table-column prop="roleDesc" label="角色描述"> </el-table-column>
+        <el-table-column label="#" type="index"></el-table-column>
+        <el-table-column prop="roleName" label="角色名称"></el-table-column>
+        <el-table-column prop="roleDesc" label="角色描述"></el-table-column>
         <el-table-column label="操作" width="600px">
           <template slot-scope="scope">
             <!-- 编辑用户信息 -->
@@ -70,7 +73,8 @@
               size="mini"
               icon="el-icon-edit"
               @click="ModifyTheUser(scope.row.id)"
-              >编辑</el-button
+            >编辑
+            </el-button
             >
             <!-- 删除用户信息 -->
             <el-button
@@ -78,15 +82,17 @@
               size="mini"
               icon="el-icon-delete-solid"
               @click="delUser(scope.row.id)"
-              >删除</el-button
+            >删除
+            </el-button
             >
             <!-- 用户信息分配 -->
             <el-button
               type="warning"
               size="mini"
               icon="el-icon-setting"
-              @click="AssignUserRights"
-              >分配权限</el-button
+              @click="AssignUserRights(scope.row)"
+            >分配权限
+            </el-button
             >
           </template>
         </el-table-column>
@@ -103,12 +109,14 @@
         show-checkbox
         default-expand-all
         node-key="id"
+        ref="treeShu"
+        :default-checked-keys="DefaultSelectedNode"
         :default-expanded-keys="OpenByDefaultList"
       ></el-tree>
       <span slot="footer" class="dialog-footer">
         <el-button @click="showAssignUserRights = false">取 消</el-button>
-        <el-button type="primary" @click="showAssignUserRights = false"
-          >确 定</el-button
+        <el-button type="primary" @click="AddPermissions"
+        >确 定</el-button
         >
       </span>
     </el-dialog>
@@ -116,7 +124,8 @@
 </template>
 
 <script>
-import { getRoleList, delAuthz, getPermissionsListtree } from '@/api'
+import { getRoleList, delAuthz, getPermissionsListtree, getRoleAuthorization } from '@/api'
+
 export default {
   data() {
     return {
@@ -130,7 +139,11 @@ export default {
         children: 'children'
       },
       // 默认展开的数组
-      OpenByDefaultList: []
+      OpenByDefaultList: [],
+      // 默认展开选中节点数组
+      DefaultSelectedNode: [],
+      // 用户id
+      userID: ''
     }
   },
   created() {
@@ -166,15 +179,47 @@ export default {
       }
     },
     // 分配用户权限
-    async AssignUserRights() {
+    async AssignUserRights(node) {
+      this.userID = node.id
       try {
         this.showAssignUserRights = true
         const res = await getPermissionsListtree()
         console.log(res)
         this.treeList = res.data.data
+        this.DefaultSelectedNode = []
+        this.RecursiveNode(node, this.DefaultSelectedNode)
       } catch (error) {
         this.$message({
           message: '出错了，获取列表失败',
+          type: 'warning'
+        })
+      }
+    },
+    // 定义默认显示节点的递归方法
+    RecursiveNode(node, arr) {
+      if (!node.children) {
+        return arr.push(node.id)
+      }
+      node.children.forEach(item => {
+        this.RecursiveNode(item, arr)
+      })
+    },
+    // 点击确定添加权限
+    async AddPermissions() {
+      this.showAssignUserRights = false
+      const keys = [
+        ...this.$refs.treeShu.getCheckedKeys(),
+        ...this.$refs.treeShu.getHalfCheckedKeys()
+      ]
+      try {
+        await getRoleAuthorization(this.userID, keys.join(','))
+        this.$message({
+          message: '分配权限成功',
+          type: 'warning'
+        })
+      } catch (e) {
+        this.$message({
+          message: '出错了，分配权限失败',
           type: 'warning'
         })
       }
@@ -187,12 +232,15 @@ export default {
 .el-tag {
   margin: 10px 15px;
 }
+
 .row-button {
   border-bottom: 1px solid #eee;
 }
+
 .row-button1 {
   border-top: 1px solid #eee;
 }
+
 .center {
   display: flex;
   align-items: center;
